@@ -1,0 +1,175 @@
+---
+title: "Modeling and prediction for movies"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(statsr)
+library(GGally)
+
+```
+
+### Load data
+
+Make sure your data and R Markdown files are in the same directory. When loaded
+your data file will be called `movies`. Delete this note when before you submit 
+your work. 
+
+```{r load-data}
+load("movies.Rdata")
+```
+
+```{r}
+data("movies.Rdata")
+```
+
+
+* * *
+
+## Part 1: Data
+Data description:
+The data set is comprised of 651 randomly sampled movies produced and released before 2016.
+
+Some of these variables are only there for informational purposes and do not make any sense to include in a statistical analysis. It is up to you to decide which variables are meaningful and which should be omitted. For example information in the the `actor1` through `actor5` variables was used to determine whether the movie casts an actor or actress who won a best actor or actress Oscar.
+
+The data of the project is collected from the Rotten Tomatoes and IMDB
+
+The data set is comprised of 651 randomly sampled movies produced and released before 2016, each row in the dataset is a movie and each column is a characteristic of a movie. Therefore, the data should allow us to generalize to the population of interest. However, there is no causation can be established because random assignment is not used in this study. In addition, potential biases are associated with non-voting or non_rating because the voting and rating are voluntary on IMDB and Rotten Tomatos website.
+
+From common sense, we realized that many of the variables are irrelevant to the purpose of identifying the popularity of a movie. As such, we select the following variables to start our analysis.
+
+title_type: Type of movie (Documentary, Feature Film, TV Movie)
+genre: Genre of movie (Action & Adventure, Comedy, Documentary, Drama, Horror, Mystery & Suspense, Other)
+runtime: Runtime of movie (in minutes)
+imdb_rating: Rating on IMDB
+imdb_num_votes: Number of votes on IMDB
+critics_rating: Categorical variable for critics rating on Rotten Tomatoes (Certified Fresh, Fresh, Rotten)
+critics_score: Critics score on Rotten Tomatoes
+audience_rating: Categorical variable for audience rating on Rotten Tomatoes (Spilled, Upright)
+audience_score: Audience score on Rotten Tomatoes
+best_pic_win: Whether or not the movie won a best picture Oscar (no, yes)
+best_actor_win: Whether or not one of the main actors in the movie ever won an Oscar (no, yes) - note that this is not necessarily whether the actor won an Oscar for their role in the given movie
+best_actress win: Whether or not one of the main actresses in the movie ever won an Oscar (no, yes) - not that this is not necessarily whether the actresses won an Oscar for their role in the given movie
+best_dir_win: Whether or not the director of the movie ever won an Oscar (no, yes) - not that this is not necessarily whether the director won an Oscar for the given movie
+
+* * *
+
+## Part 2: Research question
+
+1.Is there any association between critics score and rating on IMDB?
+
+2.Which website has better association with critics score?
+
+3.The rating of which site has better association with Oscar best movie?
+
+* * *
+
+## Part 3: Exploratory data analysis
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button above. Make sure that your code is visible in the project you submit. 
+Delete this note when before you submit your work.
+
+To beigin with, we briefly check the data.
+
+```{r}
+str(movies)
+```
+```{r}
+summary(movies)
+```
+```{r}
+dim(movies)
+```
+
+
+The histogram of IMDB score.
+```{r}
+hist(movies$imdb_rating)
+```
+
+The histogram of RT score.
+```{r}
+hist(movies$audience_score)
+```
+
+The histogram of critic score.
+```{r}
+hist(movies$critics_score)
+```
+The critics score has higher variance and lower mean.
+
+* * *
+
+## Part 4: Modeling
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button above. Make sure that your code is visible in the project you submit. 
+Delete this note when before you submit your work.
+
+First of all, we extract target data from `movies`, all the movies before 2016 and `imdb_rating`, `audience_score`, `critics_score` for imdb rateing, RT rating and critics rating.
+
+
+
+now we anaylze the linear association of imdb_rating, audience_score to critics_score.
+
+```{r}
+ggplot(data = movies, aes(x = imdb_rating, y = critics_score)) +
+  geom_point()
+```
+
+```{r}
+ggplot(data = movies, aes(x = audience_score, y = critics_score)) +
+  geom_point()
+```
+Seems like the imdb_rating has a high linear coefficient than audience score from RT.
+Then we move on to build linear model.
+
+```{r}
+m_full <- lm(critics_score ~ imdb_rating + audience_score, data = movies)
+summary(m_full)
+```
+Both ratings have very small p value, however imdb rating has even smaller p value.
+The combination of imdb_rating and rt_rating gives a R-squared of 0.5912.
+
+
+
+* * *
+
+## Part 5: Prediction
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button above. Make sure that your code is visible in the project you submit. 
+Delete this note when before you submit your work.
+
+
+In order to prediction, we choose a film from 2018,  <Green Book>.
+RT score = 91
+IMDB score = 8.2
+Critics score = 76
+
+Critics score predicted = 92
+
+We picked another film, <zootopia> on 2016.
+RT score = 92
+IMDB score = 8.0
+Critics score = 80.9
+
+Critics score predicted = 89.13
+
+* * *
+
+## Part 6: Conclusion
+
+The model has a high adjusted R square, which indicates that this model could able to predict critics score based on imdb score and Rt score.
+
